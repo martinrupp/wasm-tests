@@ -1,0 +1,15 @@
+{
+  "name": "wasm_ffi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "wasm_ffi.js",
+  "scripts": {
+    "start": "node wasm_ffi.js",
+    "asc": "asc person.ts --runtime incremental --binaryFile person.wasm"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wasm-ffi": "^0.3.0"
+  }
+}
