@@ -84,23 +84,32 @@ function qsVMAddLog(vm: QuickJSContext, mylog = console.log) {
   logHandle.dispose()
 }
 
-// adding a function like
-// myFunc(args) { const x = args && args.length ? args[0].x+9 : 2;
-//    return {a:1 , b: x }
-// }
-function qsVMAddMyFunc(vm: QuickJSContext) {
+type Vector = {x: number, y: number};
+const rotate = (vec: Vector, beta: number) => {
+  // calculation
+  const [sin, cos] = [Math.sin(beta), Math.cos(beta)]
+  return {
+    x: cos*vec.x - sin*vec.y,
+    y: sin*vec.x + cos*vec.y,
+  }
+}
+
+// adding above's function "rotate" to the vm
+function qsVMAddRotateFunc(vm: QuickJSContext) {
   // or use vm.newFunction(...).consume( (f) => vm.setProp(vm.global, "myFunc", f))
-  const funcHandle = vm.newFunction("myFunc", (...args) => {
-    const nativeArgs = args.map(vm.dump);
-    console.log(nativeArgs)
-    const obj = vm.newObject();
-    vm.newNumber(1).consume( (h) => vm.setProp(obj, 'a', h));
-    const x = nativeArgs && nativeArgs.length > 0 ? nativeArgs[0].x+9 : 2;
-    vm.newNumber(x).consume( (h) => vm.setProp(obj, 'b', h));
+  const rotateHandle = vm.newFunction("rotate", (...args) => {
+    // get args
+    const [vec, beta] = args.map(vm.dump);
+    // calculation
+    const vec2 = rotate(vec, beta);
+    // construct return
+    const obj = vm.newObject();    
+    vm.newNumber(vec2.x).consume( (h) => vm.setProp(obj, 'x', h));
+    vm.newNumber(vec2.y).consume( (h) => vm.setProp(obj, 'y', h));
     return obj;
   })
-  vm.setProp(vm.global, "myFunc", funcHandle)
-  funcHandle.dispose();
+  vm.setProp(vm.global, "rotate", rotateHandle)
+  rotateHandle.dispose();
 }
 
 // execute code in the vm
@@ -110,7 +119,7 @@ async function qsExecute(code: string) {
   const vm = QuickJS.newContext()
 
   qsVMAddLog(vm, (...args) => console.log('From QuickJS:', ...args) );
-  qsVMAddMyFunc(vm);
+  qsVMAddRotateFunc(vm);
   
   const result = vm.evalCode(code)
   if (result.error) {
@@ -181,13 +190,13 @@ export async function main(myargs: readonly string[]) {
   console.log("\n---- Passing functions to QuickJS ----")
   await qsExecute(`console.log('hello'); 700`)
   
-  console.log("\n---- Using functions within QuickJS and pass them values to the outside ----")
-  await qsExecute(`console.log(myFunc()); 700`)
-
+  // 360° = 2 Pi, so 90° = Pi/2. We rotate the vector [10,10] by 90° resulting in [10, -10]
   console.log("\n---- Using functions within QuickJS that return values from the outside ----")
-  await qsExecute(`console.log(myFunc({x: 9})); 700`)
+  await qsExecute(`console.log(rotate({x: 10, y: 10}, Math.PI/2)); 700`)
 
-  // await qsExecute(`require('fs'); 700`) // require is not defined
+  const res = JSON.stringify(rotate({x: 10, y: 10}, Math.PI/2));
+  console.log(`expected output is ${res}`);
+  
 }
 
 main(process.argv.slice(2)).catch((error) => {
