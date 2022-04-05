@@ -142,7 +142,6 @@ async function qsTestMemoryLimits() {
       str.length;
       `, 1000, (1024+7)*1024)) break;
   }
-  console.log('');  
 }
 
 // test quickjs' time limit functionality
@@ -165,22 +164,30 @@ async function qsTestTimeLimit() {
       sum;
       `, 1000, 1024*1024)) break;
   }
-
-  console.log('');  
 }
 
 // runt all tests
 export async function main(myargs: readonly string[]) {
+  console.log("---- Passing external variables to QuickJS ----")
   await qsExternalVars( new Date().toISOString() );
   
+  console.log("\n---- Setting Memory Limits in QuickJS ----")  
   await qsTestMemoryLimits();
+
+  console.log("\n---- Setting Execution Time Limits in QuickJS ----")
   await qsTestTimeLimit();
 
 
-  await qsExecute('1234')
+  console.log("\n---- Passing functions to QuickJS ----")
   await qsExecute(`console.log('hello'); 700`)
+  
+  console.log("\n---- Using functions within QuickJS and pass them values to the outside ----")
   await qsExecute(`console.log(myFunc()); 700`)
+
+  console.log("\n---- Using functions within QuickJS that return values from the outside ----")
   await qsExecute(`console.log(myFunc({x: 9})); 700`)
+
+  // await qsExecute(`require('fs'); 700`) // require is not defined
 }
 
 main(process.argv.slice(2)).catch((error) => {
