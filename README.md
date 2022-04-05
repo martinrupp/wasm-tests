@@ -26,3 +26,8 @@ class Person {
 
 as parameters / return values to/from functions.
 This is still a bit buggy, since the string only returns one character.
+
+# quickjs-emscripten
+
+In this test, the WASM thing we execute is a whole JS Interpreter, and that interpreter can then run every JS code.
+While not *compiling* the whole JS code to WASM, we still *execute* the whole JS in a WASM container.

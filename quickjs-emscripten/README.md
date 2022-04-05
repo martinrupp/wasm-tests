@@ -1,7 +1,9 @@
 # Description
-This is a test using https://github.com/justjake/quickjs-emscripten .
-We're running some JS code in a secure "VM".
-We can have some time and memory limits.
+In this test, the WASM thing we execute is a whole JS Interpreter, and that interpreter can then run every JS code.
+While not *compiling* the whole JS code to WASM, we still *execute* the whole JS in a WASM container.
+
+As JS interpreter we use https://github.com/justjake/quickjs-emscripten .
+With this, we can run the JS code in a secure "VM", and even set time and memory limits.
 
 # what we can do with QuickJS
 
